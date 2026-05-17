@@ -22,12 +22,9 @@ _api_key = os.getenv("GEMINI_API_KEY")
 if not _api_key:
     logger.critical("GEMINI_API_KEY no está configurada. El agente no podrá responder.")
 
-client = genai.Client(
-    api_key=_api_key,
-    http_options=types.HttpOptions(api_version="v1alpha")
-)
+client = genai.Client(api_key=_api_key)
 
-# gemini-2.5-flash — modelo que funciona con esta cuenta
+# gemini-2.5-flash con cuenta paga — API estable
 MODELO = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 
 

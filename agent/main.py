@@ -79,10 +79,7 @@ async def diagnostico():
         return resultado
 
     try:
-        test_client = genai.Client(
-            api_key=gemini_key,
-            http_options=gtypes.HttpOptions(api_version="v1alpha")
-        )
+        test_client = genai.Client(api_key=gemini_key)
         response = await test_client.aio.models.generate_content(
             model=modelo,
             contents=[gtypes.Content(role="user", parts=[gtypes.Part(text="Di solo: OK")])]
