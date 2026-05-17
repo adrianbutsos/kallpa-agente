@@ -17,14 +17,18 @@ from dotenv import load_dotenv
 load_dotenv()
 logger = logging.getLogger("kallpa")
 
-# Cliente Gemini (nuevo SDK google-genai)
-# v1alpha requerido para modelos preview como gemini-2.5-flash
+# Cliente Gemini — usa v1beta para mayor estabilidad en producción
+_api_key = os.getenv("GEMINI_API_KEY")
+if not _api_key:
+    logger.critical("GEMINI_API_KEY no está configurada. El agente no podrá responder.")
+
 client = genai.Client(
-    api_key=os.getenv("GEMINI_API_KEY"),
-    http_options=types.HttpOptions(api_version="v1alpha")
+    api_key=_api_key,
+    http_options=types.HttpOptions(api_version="v1beta")
 )
 
-MODELO = "gemini-2.5-flash"
+# gemini-2.0-flash como fallback más estable en producción
+MODELO = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
 
 
 def cargar_config_prompts() -> dict:
@@ -195,6 +199,6 @@ async def generar_respuesta(
         return texto, resultado_tool
 
     except Exception as e:
-        logger.error(f"Error Gemini API: {e}")
+        logger.error(f"Error Gemini API [{type(e).__name__}]: {e}", exc_info=True)
         config = cargar_config_prompts()
         return config.get("error_message", "Lo siento, tuve un problema técnico."), None
