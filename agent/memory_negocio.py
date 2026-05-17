@@ -21,7 +21,8 @@ DATABASE_NEGOCIO_URL = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./kallpa.d
 if DATABASE_NEGOCIO_URL.startswith("postgresql://"):
     DATABASE_NEGOCIO_URL = DATABASE_NEGOCIO_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
 
-engine_negocio = create_async_engine(DATABASE_NEGOCIO_URL, echo=False)
+_connect_args_negocio = {"timeout": 30} if DATABASE_NEGOCIO_URL.startswith("sqlite") else {}
+engine_negocio = create_async_engine(DATABASE_NEGOCIO_URL, echo=False, connect_args=_connect_args_negocio)
 session_negocio = async_sessionmaker(engine_negocio, class_=AsyncSession, expire_on_commit=False)
 
 
@@ -169,6 +170,28 @@ async def obtener_precio(telefono: str) -> ConfigPrecio | None:
     async with session_negocio() as s:
         result = await s.execute(select(ConfigPrecio).where(ConfigPrecio.telefono == telefono))
         return result.scalar_one_or_none()
+
+
+# ── Reseteo ────────────────────────────────────────────────
+
+async def resetear_emprendedor(telefono: str):
+    """Borra el perfil, costos y precio de un emprendedor (lo deja como nuevo)."""
+    async with session_negocio() as s:
+        for modelo in (Costo, ConfigPrecio, Emprendedor):
+            result = await s.execute(select(modelo).where(modelo.telefono == telefono))
+            for fila in result.scalars().all():
+                await s.delete(fila)
+        await s.commit()
+
+
+async def resetear_todo():
+    """Borra TODOS los emprendedores, costos y precios de la base de datos."""
+    async with session_negocio() as s:
+        for modelo in (Costo, ConfigPrecio, Emprendedor):
+            result = await s.execute(select(modelo))
+            for fila in result.scalars().all():
+                await s.delete(fila)
+        await s.commit()
 
 
 # ── Contexto completo ──────────────────────────────────────

@@ -14,7 +14,8 @@ DATABASE_URL = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./kallpa.db")
 if DATABASE_URL.startswith("postgresql://"):
     DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
 
-engine = create_async_engine(DATABASE_URL, echo=False)
+_connect_args = {"timeout": 30} if DATABASE_URL.startswith("sqlite") else {}
+engine = create_async_engine(DATABASE_URL, echo=False, connect_args=_connect_args)
 async_session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 
@@ -61,6 +62,15 @@ async def obtener_historial(telefono: str, limite: int = 15) -> list[dict]:
 async def limpiar_historial(telefono: str):
     async with async_session() as session:
         result = await session.execute(select(Mensaje).where(Mensaje.telefono == telefono))
+        for msg in result.scalars().all():
+            await session.delete(msg)
+        await session.commit()
+
+
+async def limpiar_todo_historial():
+    """Borra TODO el historial de conversaciones de todos los números."""
+    async with async_session() as session:
+        result = await session.execute(select(Mensaje))
         for msg in result.scalars().all():
             await session.delete(msg)
         await session.commit()

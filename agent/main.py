@@ -52,6 +52,28 @@ async def health():
     return {"status": "ok", "agente": "Kallpa", "fundacion": "Fundación Kallpa"}
 
 
+@app.get("/reset/{telefono}")
+async def reset_emprendedor(telefono: str):
+    """Borra el historial y los datos de un emprendedor (lo deja como usuario nuevo)."""
+    from agent.memory import limpiar_historial
+    from agent.memory_negocio import resetear_emprendedor
+    await limpiar_historial(telefono)
+    await resetear_emprendedor(telefono)
+    logger.info(f"[{telefono}] Datos reseteados")
+    return {"status": "ok", "mensaje": f"Datos de {telefono} borrados. Ahora es usuario nuevo."}
+
+
+@app.get("/reset-todo")
+async def reset_todo():
+    """Borra TODOS los datos: historial y emprendedores. Deja la base de datos limpia."""
+    from agent.memory import limpiar_todo_historial
+    from agent.memory_negocio import resetear_todo
+    await limpiar_todo_historial()
+    await resetear_todo()
+    logger.info("Base de datos reseteada completamente")
+    return {"status": "ok", "mensaje": "Toda la base de datos fue borrada. Todos son usuarios nuevos."}
+
+
 @app.get("/diagnostico")
 async def diagnostico():
     """Endpoint de diagnóstico — prueba la conexión a Gemini y muestra configuración."""
