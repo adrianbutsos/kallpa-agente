@@ -52,6 +52,50 @@ async def health():
     return {"status": "ok", "agente": "Kallpa", "fundacion": "Fundación Kallpa"}
 
 
+@app.get("/diagnostico")
+async def diagnostico():
+    """Endpoint de diagnóstico — prueba la conexión a Gemini y muestra configuración."""
+    import os
+    from google import genai
+    from google.genai import types as gtypes
+
+    gemini_key = os.getenv("GEMINI_API_KEY", "")
+    whapi_token = os.getenv("WHAPI_TOKEN", "")
+    modelo = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
+
+    resultado = {
+        "gemini_key_presente": bool(gemini_key),
+        "gemini_key_primeros_chars": gemini_key[:12] + "..." if gemini_key else "NO CONFIGURADA",
+        "whapi_token_presente": bool(whapi_token),
+        "modelo": modelo,
+        "base_url": os.getenv("BASE_URL", "no configurada"),
+        "environment": os.getenv("ENVIRONMENT", "no configurado"),
+        "gemini_test": None,
+        "gemini_error": None,
+    }
+
+    if not gemini_key:
+        resultado["gemini_error"] = "GEMINI_API_KEY no está configurada en las variables de entorno"
+        return resultado
+
+    try:
+        test_client = genai.Client(
+            api_key=gemini_key,
+            http_options=gtypes.HttpOptions(api_version="v1beta")
+        )
+        response = await test_client.aio.models.generate_content(
+            model=modelo,
+            contents=[gtypes.Content(role="user", parts=[gtypes.Part(text="Di solo: OK")])]
+        )
+        resultado["gemini_test"] = "✅ Gemini responde correctamente"
+        resultado["gemini_respuesta"] = response.candidates[0].content.parts[0].text
+    except Exception as e:
+        resultado["gemini_test"] = "❌ Error al conectar con Gemini"
+        resultado["gemini_error"] = f"[{type(e).__name__}] {str(e)}"
+
+    return resultado
+
+
 @app.get("/webhook")
 async def webhook_verificacion(request: Request):
     resultado = await proveedor.validar_webhook(request)
