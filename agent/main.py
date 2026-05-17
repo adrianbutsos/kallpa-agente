@@ -61,7 +61,7 @@ async def diagnostico():
 
     gemini_key = os.getenv("GEMINI_API_KEY", "")
     whapi_token = os.getenv("WHAPI_TOKEN", "")
-    modelo = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
+    modelo = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 
     resultado = {
         "gemini_key_presente": bool(gemini_key),
