@@ -104,32 +104,34 @@ async def webhook_verificacion(request: Request):
 @app.post("/webhook")
 async def webhook_handler(request: Request):
     """Recibe mensajes de WhatsApp y responde con el agente Kallpa."""
+    # Parsear el webhook — si esto falla, no podemos hacer nada
     try:
         mensajes = await proveedor.parsear_webhook(request)
+    except Exception as e:
+        logger.error(f"Error parseando webhook: {e}", exc_info=True)
+        return {"status": "ok"}
 
-        for msg in mensajes:
-            if msg.es_propio or not msg.texto:
-                continue
+    # Procesar cada mensaje de forma independiente y resiliente
+    for msg in mensajes:
+        if msg.es_propio or not msg.texto:
+            continue
 
-            telefono = msg.telefono
-            texto = msg.texto.strip()
-            logger.info(f"[{telefono}] {texto}")
+        telefono = msg.telefono
+        texto = msg.texto.strip()
+        logger.info(f"[{telefono}] Mensaje recibido: {texto}")
 
+        try:
             # Asegurar que el emprendedor existe en DB
             emp = await obtener_emprendedor(telefono)
             if not emp:
+                logger.info(f"[{telefono}] Usuario nuevo — creando perfil")
                 await crear_emprendedor(telefono)
 
-            # Obtener contexto completo del emprendedor
+            # Obtener contexto completo e historial
             contexto = await obtener_contexto_completo(telefono)
-
-            # Obtener historial de conversación
             historial = await obtener_historial(telefono)
 
             # Generar respuesta con Gemini
-            def _ejecutar(nombre, args):
-                return ejecutar_herramienta(nombre, args, telefono)
-
             respuesta_texto, resultado_tool = await generar_respuesta(
                 mensaje=texto,
                 historial=historial,
@@ -142,27 +144,42 @@ async def webhook_handler(request: Request):
             await guardar_mensaje(telefono, "assistant", respuesta_texto)
 
             # Enviar respuesta de texto
-            await proveedor.enviar_mensaje(telefono, respuesta_texto)
+            enviado = await proveedor.enviar_mensaje(telefono, respuesta_texto)
+            if enviado:
+                logger.info(f"[{telefono}] Whapi ACEPTÓ el envío")
+            else:
+                logger.error(
+                    f"[{telefono}] Whapi RECHAZÓ el envío — revisar plan/restricciones "
+                    f"de Whapi para este número"
+                )
 
             # Si el dashboard fue solicitado, enviar también el resumen y el link
             if resultado_tool and resultado_tool.get("necesita_enviar_dashboard"):
                 resumen_wa = resultado_tool.get("resumen_whatsapp", "")
                 if resumen_wa:
                     await proveedor.enviar_mensaje(telefono, resumen_wa)
-                # Enviar link del dashboard
                 url_dashboard = f"{BASE_URL}/dashboard/{telefono}"
                 await proveedor.enviar_mensaje(
                     telefono,
                     f"📲 *Ver dashboard completo:*\n{url_dashboard}"
                 )
 
-            logger.info(f"[{telefono}] Respuesta enviada")
+            logger.info(f"[{telefono}] Respuesta enviada OK")
 
-        return {"status": "ok"}
+        except Exception as e:
+            # Un error en un mensaje no debe tumbar todo el webhook
+            logger.error(f"[{telefono}] Error procesando mensaje: {e}", exc_info=True)
+            # Intentar avisar al usuario aunque algo haya fallado
+            try:
+                await proveedor.enviar_mensaje(
+                    telefono,
+                    "Tuve un problemita técnico. Intenta de nuevo en un momento."
+                )
+            except Exception as e2:
+                logger.error(f"[{telefono}] No se pudo ni enviar el mensaje de error: {e2}")
 
-    except Exception as e:
-        logger.error(f"Error en webhook: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+    # Siempre devolver 200 para que Whapi no reintente indefinidamente
+    return {"status": "ok"}
 
 
 @app.get("/dashboard/{telefono}", response_class=HTMLResponse)
