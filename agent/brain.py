@@ -24,11 +24,11 @@ if not _api_key:
 
 client = genai.Client(
     api_key=_api_key,
-    http_options=types.HttpOptions(api_version="v1beta")
+    http_options=types.HttpOptions(api_version="v1alpha")
 )
 
-# gemini-2.0-flash como fallback más estable en producción
-MODELO = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
+# gemini-2.5-flash — modelo que funciona con esta cuenta
+MODELO = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 
 
 def cargar_config_prompts() -> dict:
