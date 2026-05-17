@@ -1,0 +1,22 @@
+# Configuración del negocio — Kallpa
+negocio:
+  nombre: "Fundación Kallpa"
+  descripcion: |
+    Fundación Kallpa apoya a emprendedores bolivianos a formalizar y hacer crecer
+    sus negocios. El agente de WhatsApp ayuda a registrar y analizar los costos
+    del emprendimiento para tomar mejores decisiones financieras.
+  horario: "24 horas, los 7 días de la semana"
+
+agente:
+  tono: "empático, cálido y motivador — como un mentor de negocios amigable"
+  casos_de_uso:
+    - "Módulo de plan de negocios"
+    - "Registro y clasificación de costos fijos y variables"
+    - "Análisis de precio de venta actual y sugerido"
+    - "Cálculo de margen de ganancia y punto de equilibrio"
+    - "Dashboard financiero visual y resumen por WhatsApp"
+
+metadata:
+  creado: "2026-04-17"
+  version: "1.0"
+  ia: "Google Gemini"

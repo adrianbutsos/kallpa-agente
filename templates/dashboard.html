@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — {{nombre_negocio}} | Fundación Kallpa</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; color: #2d3748; }
+
+    .header {
+      background: linear-gradient(135deg, #2b6cb0, #4299e1);
+      color: white; padding: 24px 32px;
+      display: flex; align-items: center; gap: 16px;
+    }
+    .header h1 { font-size: 1.5rem; }
+    .header p { font-size: 0.9rem; opacity: 0.85; margin-top: 4px; }
+    .logo { font-size: 2.5rem; }
+
+    .container { max-width: 960px; margin: 0 auto; padding: 24px 16px; }
+
+    .salud-banner {
+      padding: 12px 20px; border-radius: 10px; margin-bottom: 24px;
+      font-weight: 600; font-size: 1rem; text-align: center;
+    }
+    .salud-buena  { background: #c6f6d5; color: #276749; }
+    .salud-regular { background: #fefcbf; color: #744210; }
+    .salud-critica { background: #fed7d7; color: #742a2a; }
+
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+
+    .card {
+      background: white; border-radius: 12px; padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .card .label { font-size: 0.78rem; color: #718096; text-transform: uppercase; letter-spacing: 0.05em; }
+    .card .value { font-size: 1.6rem; font-weight: 700; margin: 6px 0 4px; color: #2b6cb0; }
+    .card .sub   { font-size: 0.82rem; color: #a0aec0; }
+    .card.highlight .value { color: #276749; }
+    .card.warning .value  { color: #c05621; }
+    .card.danger .value   { color: #c53030; }
+
+    .section { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 20px; }
+    .section h2 { font-size: 1rem; font-weight: 600; margin-bottom: 16px; color: #4a5568; border-bottom: 2px solid #ebf4ff; padding-bottom: 8px; }
+
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; font-size: 0.78rem; color: #718096; padding: 8px 12px; border-bottom: 1px solid #e2e8f0; }
+    td { padding: 10px 12px; border-bottom: 1px solid #f7fafc; font-size: 0.9rem; }
+    tr:last-child td { border-bottom: none; }
+    .badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+    .badge-fijo     { background: #ebf4ff; color: #2b6cb0; }
+    .badge-variable { background: #faf5ff; color: #6b46c1; }
+    .total-row td   { font-weight: 700; background: #f7fafc; }
+
+    .footer { text-align: center; padding: 24px; color: #a0aec0; font-size: 0.8rem; }
+    .footer strong { color: #4299e1; }
+
+    @media (max-width: 600px) {
+      .grid { grid-template-columns: 1fr 1fr; }
+      .card .value { font-size: 1.3rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">📊</div>
+  <div>
+    <h1>{{nombre_negocio}}</h1>
+    <p>Plan de Negocios · Generado por {{nombre_agente}} · Fundación Kallpa</p>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Banner de salud -->
+  <div class="salud-banner salud-{{salud}}">
+    {{salud_emoji}} Salud financiera: {{salud_texto}} — Margen actual: {{margen_ganancia}}%
+  </div>
+
+  <!-- KPIs principales -->
+  <div class="grid">
+    <div class="card">
+      <div class="label">Costos Fijos / mes</div>
+      <div class="value">Bs. {{total_fijos}}</div>
+      <div class="sub">{{n_fijos}} concepto(s)</div>
+    </div>
+    <div class="card">
+      <div class="label">Costos Variables / unidad</div>
+      <div class="value">Bs. {{cv_unitario}}</div>
+      <div class="sub">{{n_variables}} concepto(s)</div>
+    </div>
+    <div class="card">
+      <div class="label">Precio actual</div>
+      <div class="value">Bs. {{precio_actual}}</div>
+      <div class="sub">por unidad</div>
+    </div>
+    <div class="card {{clase_precio_sugerido}}">
+      <div class="label">Precio sugerido ({{margen_objetivo}}% margen)</div>
+      <div class="value">Bs. {{precio_sugerido}}</div>
+      <div class="sub">{{diferencia_precio}}</div>
+    </div>
+    <div class="card {{clase_margen}}">
+      <div class="label">Margen de ganancia</div>
+      <div class="value">{{margen_ganancia}}%</div>
+      <div class="sub">sobre precio de venta</div>
+    </div>
+    <div class="card">
+      <div class="label">Punto de equilibrio</div>
+      <div class="value">{{punto_equilibrio}} u.</div>
+      <div class="sub">Bs. {{pe_monto}} / mes</div>
+    </div>
+    <div class="card {{clase_utilidad}}">
+      <div class="label">Utilidad estimada</div>
+      <div class="value">Bs. {{utilidad_mes}}</div>
+      <div class="sub">con {{unidades_mes}} unidades/mes</div>
+    </div>
+  </div>
+
+  <!-- Detalle de costos -->
+  <div class="section">
+    <h2>📋 Detalle de Costos</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Concepto</th>
+          <th>Tipo</th>
+          <th>Categoría</th>
+          <th style="text-align:right">Monto (Bs.)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{filas_costos}}
+        <tr class="total-row">
+          <td colspan="3">Total Costos Fijos / mes</td>
+          <td style="text-align:right">{{total_fijos}}</td>
+        </tr>
+        <tr class="total-row">
+          <td colspan="3">Total Costos Variables / unidad</td>
+          <td style="text-align:right">{{cv_unitario}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Interpretación -->
+  <div class="section">
+    <h2>💡 Interpretación</h2>
+    <p style="line-height:1.7; color:#4a5568">{{interpretacion}}</p>
+  </div>
+
+</div>
+
+<div class="footer">
+  Generado por <strong>Fundación Kallpa</strong> · Asistente {{nombre_agente}} · {{fecha}}
+</div>
+
+</body>
+</html>
