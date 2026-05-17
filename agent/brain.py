@@ -145,12 +145,15 @@ async def generar_respuesta(
         resultado_tool = None
         max_iteraciones = 5
 
-        for _ in range(max_iteraciones):
+        for iteracion in range(max_iteraciones):
+            logger.info(f"Iteración {iteracion + 1} — llamando a Gemini...")
             response = await client.aio.models.generate_content(
                 model=MODELO,
                 contents=contents,
                 config=config_gen
             )
+
+            logger.info(f"Respuesta recibida — finish_reason: {response.candidates[0].finish_reason}")
 
             # Verificar function calls
             tiene_function_call = False
@@ -162,19 +165,22 @@ async def generar_respuesta(
 
                     logger.info(f"Gemini llama: {func_name}({func_args})")
 
-                    resultado = await ejecutar_herramienta(func_name, func_args)
-                    resultado_tool = resultado
+                    try:
+                        resultado = await ejecutar_herramienta(func_name, func_args)
+                        resultado_tool = resultado
+                        logger.info(f"Herramienta ejecutada OK: {resultado}")
+                    except Exception as tool_err:
+                        logger.error(f"Error ejecutando {func_name}: {tool_err}", exc_info=True)
+                        resultado = {"exito": False, "error": str(tool_err)}
 
-                    logger.info(f"Resultado: {resultado}")
-
-                    # Agregar respuesta del modelo y resultado de la tool al historial
+                    # Devolver resultado a Gemini
                     contents.append(response.candidates[0].content)
                     contents.append(types.Content(
                         role="user",
                         parts=[types.Part(
                             function_response=types.FunctionResponse(
                                 name=func_name,
-                                response=resultado
+                                response={"result": resultado}
                             )
                         )]
                     ))
