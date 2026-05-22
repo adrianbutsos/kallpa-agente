@@ -217,29 +217,43 @@ async def eliminar_numero_autorizado(numero: str) -> bool:
         return True
 
 
+def numeros_desde_env() -> set[str]:
+    """
+    Lee números autorizados desde la variable de entorno NUMEROS_AUTORIZADOS.
+    Estos SÍ persisten entre redeploys (la base de datos de Railway se borra).
+    Formato: "59171234567,59169998888"
+    """
+    raw = os.getenv("NUMEROS_AUTORIZADOS", "")
+    return {normalizar_numero(n) for n in raw.split(",") if normalizar_numero(n)}
+
+
 async def listar_numeros_autorizados() -> list[dict]:
-    """Lista todos los números autorizados."""
+    """Lista todos los números autorizados (env + base de datos)."""
+    numeros = []
+    for num in sorted(numeros_desde_env()):
+        numeros.append({"numero": num, "nota": "(variable de entorno)", "creado_en": ""})
     async with session_negocio() as s:
         result = await s.execute(select(NumeroAutorizado).order_by(NumeroAutorizado.creado_en))
-        return [
-            {"numero": n.numero, "nota": n.nota, "creado_en": n.creado_en.isoformat()}
-            for n in result.scalars().all()
-        ]
+        for n in result.scalars().all():
+            numeros.append({"numero": n.numero, "nota": n.nota, "creado_en": n.creado_en.isoformat()})
+    return numeros
 
 
 async def puede_usar_bot(telefono: str) -> bool:
     """
     True si el número puede usar el bot.
-    Regla: si la lista está VACÍA → modo abierto (todos pueden).
-           si la lista tiene al menos un número → solo esos números.
+    Combina números de la variable de entorno (persistentes) + base de datos.
+    Regla: si NO hay ningún número en ninguna parte → modo abierto (todos pueden).
+           si hay al menos uno → solo esos números.
     """
+    num = normalizar_numero(telefono)
+    autorizados = numeros_desde_env()
     async with session_negocio() as s:
         result = await s.execute(select(NumeroAutorizado))
-        filas = list(result.scalars().all())
-        if not filas:
-            return True  # lista vacía = todos pueden (aún no se activó el filtro)
-        num = normalizar_numero(telefono)
-        return any(f.numero == num for f in filas)
+        autorizados |= {f.numero for f in result.scalars().all()}
+    if not autorizados:
+        return True  # nadie en la lista = todos pueden (filtro no activado)
+    return num in autorizados
 
 
 # ── Reseteo ────────────────────────────────────────────────
