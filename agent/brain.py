@@ -17,15 +17,26 @@ from dotenv import load_dotenv
 load_dotenv()
 logger = logging.getLogger("kallpa")
 
-# Cliente Gemini — usa v1beta para mayor estabilidad en producción
-_api_key = os.getenv("GEMINI_API_KEY")
-if not _api_key:
-    logger.critical("GEMINI_API_KEY no está configurada. El agente no podrá responder.")
-
-client = genai.Client(api_key=_api_key)
-
 # gemini-2.5-flash con cuenta paga — API estable
 MODELO = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+
+# Cliente Gemini — se crea de forma "lazy" (solo cuando se necesita).
+# Así, si falta GEMINI_API_KEY, NO se cae todo el servidor al arrancar:
+# el resto de endpoints (/, /admin, /diagnostico) siguen funcionando.
+_cliente = None
+
+
+def obtener_cliente() -> genai.Client:
+    """Crea (una sola vez) el cliente de Gemini. Lanza error claro si falta la key."""
+    global _cliente
+    if _cliente is None:
+        api_key = os.getenv("GEMINI_API_KEY")
+        if not api_key:
+            raise RuntimeError(
+                "GEMINI_API_KEY no está configurada en las variables de entorno"
+            )
+        _cliente = genai.Client(api_key=api_key)
+    return _cliente
 
 
 def cargar_config_prompts() -> dict:
@@ -144,10 +155,11 @@ async def generar_respuesta(
 
         resultado_tool = None
         max_iteraciones = 5
+        gemini = obtener_cliente()
 
         for iteracion in range(max_iteraciones):
             logger.info(f"Iteración {iteracion + 1} — llamando a Gemini...")
-            response = await client.aio.models.generate_content(
+            response = await gemini.aio.models.generate_content(
                 model=MODELO,
                 contents=contents,
                 config=config_gen
