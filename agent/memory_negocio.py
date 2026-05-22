@@ -68,6 +68,16 @@ class ConfigPrecio(Base):
     actualizado_en: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 
+class NumeroAutorizado(Base):
+    """Números de WhatsApp que el administrador autoriza a usar el bot."""
+    __tablename__ = "numeros_autorizados"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    numero: Mapped[str] = mapped_column(String(50), unique=True, index=True)
+    nota: Mapped[str] = mapped_column(String(200), nullable=True)
+    creado_en: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
 async def inicializar_db_negocio():
     """Crea las tablas si no existen."""
     async with engine_negocio.begin() as conn:
@@ -170,6 +180,66 @@ async def obtener_precio(telefono: str) -> ConfigPrecio | None:
     async with session_negocio() as s:
         result = await s.execute(select(ConfigPrecio).where(ConfigPrecio.telefono == telefono))
         return result.scalar_one_or_none()
+
+
+# ── Números autorizados (lista blanca) ─────────────────────
+
+def normalizar_numero(valor: str) -> str:
+    """Deja solo los dígitos del número (quita @s.whatsapp.net, +, espacios, etc.)."""
+    base = (valor or "").split("@")[0]
+    return "".join(c for c in base if c.isdigit())
+
+
+async def agregar_numero_autorizado(numero: str, nota: str = None) -> bool:
+    """Autoriza un número. Devuelve True si quedó autorizado."""
+    num = normalizar_numero(numero)
+    if not num:
+        return False
+    async with session_negocio() as s:
+        result = await s.execute(select(NumeroAutorizado).where(NumeroAutorizado.numero == num))
+        if result.scalar_one_or_none():
+            return True  # ya estaba autorizado
+        s.add(NumeroAutorizado(numero=num, nota=nota))
+        await s.commit()
+        return True
+
+
+async def eliminar_numero_autorizado(numero: str) -> bool:
+    """Quita la autorización de un número. Devuelve True si existía y se borró."""
+    num = normalizar_numero(numero)
+    async with session_negocio() as s:
+        result = await s.execute(select(NumeroAutorizado).where(NumeroAutorizado.numero == num))
+        fila = result.scalar_one_or_none()
+        if not fila:
+            return False
+        await s.delete(fila)
+        await s.commit()
+        return True
+
+
+async def listar_numeros_autorizados() -> list[dict]:
+    """Lista todos los números autorizados."""
+    async with session_negocio() as s:
+        result = await s.execute(select(NumeroAutorizado).order_by(NumeroAutorizado.creado_en))
+        return [
+            {"numero": n.numero, "nota": n.nota, "creado_en": n.creado_en.isoformat()}
+            for n in result.scalars().all()
+        ]
+
+
+async def puede_usar_bot(telefono: str) -> bool:
+    """
+    True si el número puede usar el bot.
+    Regla: si la lista está VACÍA → modo abierto (todos pueden).
+           si la lista tiene al menos un número → solo esos números.
+    """
+    async with session_negocio() as s:
+        result = await s.execute(select(NumeroAutorizado))
+        filas = list(result.scalars().all())
+        if not filas:
+            return True  # lista vacía = todos pueden (aún no se activó el filtro)
+        num = normalizar_numero(telefono)
+        return any(f.numero == num for f in filas)
 
 
 # ── Reseteo ────────────────────────────────────────────────

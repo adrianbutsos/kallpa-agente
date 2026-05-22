@@ -18,7 +18,9 @@ from agent.brain import generar_respuesta
 from agent.memory import inicializar_db, guardar_mensaje, obtener_historial
 from agent.memory_negocio import (
     inicializar_db_negocio, obtener_emprendedor, crear_emprendedor,
-    obtener_contexto_completo, obtener_costos, obtener_precio
+    obtener_contexto_completo, obtener_costos, obtener_precio,
+    puede_usar_bot, agregar_numero_autorizado, eliminar_numero_autorizado,
+    listar_numeros_autorizados, normalizar_numero
 )
 from agent.calculadora import calcular_resumen, formatear_bolivianos
 from agent.tools import ejecutar_herramienta
@@ -34,6 +36,8 @@ logger = logging.getLogger("kallpa")
 proveedor = obtener_proveedor()
 PORT = int(os.getenv("PORT", 8000))
 BASE_URL = os.getenv("BASE_URL", f"http://localhost:{PORT}")
+# Clave para proteger las URLs de administrador (cámbiala en Railway → Variables)
+ADMIN_KEY = os.getenv("ADMIN_KEY", "kallpa-admin")
 
 
 @asynccontextmanager
@@ -115,6 +119,50 @@ async def diagnostico():
     return resultado
 
 
+# ── Administración de números autorizados ──────────────────
+# Todas requieren ?clave=ADMIN_KEY
+
+def _verificar_admin(clave: str):
+    if clave != ADMIN_KEY:
+        raise HTTPException(status_code=403, detail="Clave de administrador incorrecta")
+
+
+@app.get("/admin/numeros")
+async def admin_listar_numeros(clave: str = ""):
+    """Lista los números autorizados. Uso: /admin/numeros?clave=TU_CLAVE"""
+    _verificar_admin(clave)
+    numeros = await listar_numeros_autorizados()
+    return {
+        "modo": "lista activa (solo estos números)" if numeros else "abierto (todos pueden usar el bot)",
+        "total": len(numeros),
+        "numeros": numeros,
+    }
+
+
+@app.get("/admin/numeros/agregar")
+async def admin_agregar_numero(numero: str, clave: str = "", nota: str = ""):
+    """Autoriza un número. Uso: /admin/numeros/agregar?clave=TU_CLAVE&numero=59171234567&nota=Juan"""
+    _verificar_admin(clave)
+    ok = await agregar_numero_autorizado(numero, nota or None)
+    return {
+        "exito": ok,
+        "numero": normalizar_numero(numero),
+        "mensaje": "Número autorizado" if ok else "Número inválido",
+    }
+
+
+@app.get("/admin/numeros/quitar")
+async def admin_quitar_numero(numero: str, clave: str = ""):
+    """Quita la autorización de un número. Uso: /admin/numeros/quitar?clave=TU_CLAVE&numero=59171234567"""
+    _verificar_admin(clave)
+    ok = await eliminar_numero_autorizado(numero)
+    return {
+        "exito": ok,
+        "numero": normalizar_numero(numero),
+        "mensaje": "Autorización eliminada" if ok else "El número no estaba en la lista",
+    }
+
+
 @app.get("/webhook")
 async def webhook_verificacion(request: Request):
     resultado = await proveedor.validar_webhook(request)
@@ -141,6 +189,11 @@ async def webhook_handler(request: Request):
         telefono = msg.telefono
         texto = msg.texto.strip()
         logger.info(f"[{telefono}] Mensaje recibido: {texto}")
+
+        # Verificar autorización (lista blanca administrada por el admin)
+        if not await puede_usar_bot(telefono):
+            logger.info(f"[{telefono}] No autorizado — mensaje ignorado")
+            continue
 
         try:
             # Asegurar que el emprendedor existe en DB
