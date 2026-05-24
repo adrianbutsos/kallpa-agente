@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manq'a | Wayna Hub — Seguimiento de Emprendedores</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-main: #FFF8F0; /* Fondo cálido claro */
+            --bg-card: #FFFFFF; /* Tarjetas blancas */
+            --bg-crema: #FFFDFB;
+            --border-color: #E2E8F0;
+            --border-warm: rgba(244, 123, 32, 0.15);
+            
+            --text-primary: #252525; /* Texto principal oscuro */
+            --text-secondary: #555555; /* Texto secundario gris */
+            --text-muted: #7F8C8D;
+            
+            /* Paleta basada en Manq'a */
+            --manqa-orange: #F47B20;
+            --manqa-green: #8CC63F;
+            --manqa-blue: #264796;
+            --manqa-fuchsia: #E72F8A;
+            --manqa-purple: #6C3BBF;
+            --gray-light: #F3F4F6;
+            
+            /* Colores de prioridades suaves */
+            --badge-alta-bg: #FDEDEC;
+            --badge-alta-text: #E74C3C;
+            
+            --badge-media-bg: #FEF5E7;
+            --badge-media-text: #F39C12;
+            
+            --badge-normal-bg: #EAF2F8;
+            --badge-normal-text: #2980B9;
+            
+            --success-bg: #E8F8F5;
+            --success-text: #117A65;
+            
+            --shadow-sm: 0 2px 4px rgba(244, 123, 32, 0.04);
+            --shadow-md: 0 4px 12px rgba(244, 123, 32, 0.06);
+            --shadow-lg: 0 10px 25px -5px rgba(244, 123, 32, 0.08);
+            --radius-lg: 1rem;
+            --radius-md: 0.75rem;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 2rem 1.5rem;
+            line-height: 1.5;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(244, 123, 32, 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(140, 198, 63, 0.05) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.75rem;
+        }
+
+        /* Header superior */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-warm);
+            padding: 1.25rem 2rem;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+        }
+
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 1.25rem;
+                align-items: flex-start;
+                padding: 1.5rem;
+            }
+        }
+
+        .header-title {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header-title h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--manqa-blue);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .header-title h1 span {
+            color: var(--manqa-orange);
+        }
+
+        .header-title p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin-top: 0.15rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        /* Botones del header */
+        .btn-csv {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, var(--manqa-orange) 0%, #f26522 100%);
+            color: white;
+            border: none;
+            padding: 0.65rem 1.25rem;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 10px rgba(244, 123, 32, 0.2);
+            font-family: inherit;
+        }
+
+        .btn-csv:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(244, 123, 32, 0.3);
+            opacity: 0.98;
+        }
+
+        .btn-reset {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: var(--gray-light);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 0.65rem 1.25rem;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            font-family: inherit;
+        }
+
+        .btn-reset:hover {
+            background-color: #e5e7eb;
+            color: #d32f2f;
+            border-color: rgba(211, 47, 47, 0.2);
+            transform: translateY(-1px);
+        }
+
+        /* 5 Tarjetas Resumen */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .stat-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-warm);
+            padding: 1.5rem;
+            border-radius: var(--radius-lg);
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background-color: var(--border-color);
+        }
+
+        /* Color-code lower borders */
+        .stat-card:nth-child(1)::after { background-color: var(--manqa-blue); }
+        .stat-card:nth-child(2)::after { background-color: var(--manqa-green); }
+        .stat-card:nth-child(3)::after { background-color: var(--manqa-orange); }
+        .stat-card:nth-child(4)::after { background-color: var(--manqa-fuchsia); }
+        .stat-card:nth-child(5)::after { background-color: var(--manqa-purple); }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            border-color: rgba(244, 123, 32, 0.25);
+        }
+
+        .stat-card .label {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .stat-card .val {
+            font-size: 2.25rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            font-family: 'Outfit', sans-serif;
+        }
+
+        /* Bot Response clean card */
+        .bot-response-bubble {
+            background-color: #FFFDF8;
+            border: 1px solid #F5E6D3;
+            padding: 1.25rem 1.5rem;
+            border-radius: var(--radius-lg);
+            border-left: 5px solid var(--manqa-orange);
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            box-shadow: var(--shadow-sm);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .bot-response-bubble.type-reset { border-left-color: var(--manqa-blue); }
+        .bot-response-bubble.type-general { border-left-color: var(--text-muted); }
+        .bot-response-bubble.type-registro { border-left-color: var(--manqa-purple); }
+        .bot-response-bubble.type-venta { border-left-color: var(--manqa-green); }
+        .bot-response-bubble.type-refuerzo { border-left-color: var(--manqa-fuchsia); }
+        .bot-response-bubble.type-asesoria { border-left-color: var(--manqa-blue); }
+
+        .response-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+        }
+
+        .response-body {
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            line-height: 1.45;
+            font-weight: 500;
+            white-space: pre-line;
+        }
+
+        /* Sección destacada: Casos que requieren seguimiento */
+        .followup-section {
+            background-color: #FCF9F5;
+            border: 1px solid var(--border-warm);
+            padding: 1.5rem;
+            border-radius: var(--radius-lg);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .followup-section h3 {
+            font-size: 1.15rem;
+            color: var(--manqa-blue);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .followup-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .followup-card {
+            background-color: var(--bg-card);
+            border: 1px solid rgba(244, 123, 32, 0.1);
+            padding: 1.25rem;
+            border-radius: var(--radius-md);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 1rem;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.2s ease;
+        }
+
+        .followup-card:hover {
+            transform: translateY(-1px);
+        }
+
+        .followup-text {
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            line-height: 1.5;
+            font-weight: 500;
+        }
+
+        .followup-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-action-primary {
+            flex: 1;
+            padding: 0.45rem;
+            background-color: var(--manqa-orange);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-align: center;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-transform: uppercase;
+            font-family: inherit;
+        }
+
+        .btn-action-primary:hover {
+            background-color: #e06811;
+        }
+
+        .btn-action-secondary {
+            flex: 1;
+            padding: 0.45rem;
+            background-color: transparent;
+            color: var(--manqa-blue);
+            border: 1px solid var(--manqa-blue);
+            border-radius: 0.5rem;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            font-family: inherit;
+        }
+
+        .btn-action-secondary:hover {
+            background-color: rgba(38, 71, 150, 0.05);
+        }
+
+        /* Workspace Grid */
+        .workspace {
+            display: grid;
+            grid-template-columns: 2.2fr 1fr;
+            gap: 1.75rem;
+        }
+
+        @media (max-width: 1024px) {
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Panel contenedor estándar */
+        .panel-box {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .panel-box-header {
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.75rem;
+        }
+
+        .panel-box-header h2 {
+            font-size: 1.25rem;
+            color: var(--manqa-blue);
+            font-weight: 700;
+        }
+
+        /* Tabla Principal */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.875rem;
+        }
+
+        th {
+            color: var(--text-secondary);
+            font-weight: 700;
+            padding: 0.85rem 0.75rem;
+            border-bottom: 2px solid var(--border-color);
+            background-color: #FCFBF9;
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            letter-spacing: 0.05em;
+        }
+
+        td {
+            padding: 0.85rem 0.75rem;
+            border-bottom: 1px solid #F3F4F6;
+            color: var(--text-primary);
+            vertical-align: middle;
+        }
+
+        tr:hover td {
+            background-color: #FFFBF7; /* Fila con tono crema suave en hover */
+        }
+
+        /* Badges de prioridades */
+        .badge-priority {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.2rem 0.65rem;
+            border-radius: 9999px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .badge-priority.alta {
+            background-color: var(--badge-alta-bg);
+            color: var(--badge-alta-text);
+        }
+
+        .badge-priority.media {
+            background-color: var(--badge-media-bg);
+            color: var(--badge-media-text);
+        }
+
+        .badge-priority.normal {
+            background-color: var(--badge-normal-bg);
+            color: var(--badge-normal-text);
+        }
+
+        /* Badge de fase */
+        .badge-fase {
+            background-color: #F3E5F5;
+            color: #7B1FA2;
+            padding: 0.15rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* Badge de acción sugerida */
+        .badge-action-suggested {
+            background-color: #E8F8F5;
+            color: #117A65;
+            padding: 0.2rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border: 1px solid rgba(17, 122, 101, 0.1);
+        }
+        
+        .badge-action-suggested.completar-perfil {
+            background-color: #FEF9E7;
+            color: #D35400;
+            border-color: rgba(211, 84, 0, 0.15);
+        }
+
+        .badge-action-suggested.revisar-caso {
+            background-color: #FDEDEC;
+            color: #C0392B;
+            border-color: rgba(192, 57, 43, 0.15);
+        }
+
+        /* Badge de Acción en la tabla (Última acción) */
+        .badge-last-action {
+            background-color: #F2F4F4;
+            color: #5D6D7E;
+            padding: 0.15rem 0.5rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* Simulador Sidebar (Con estilo de teléfono mockup amigable) */
+        .phone-mockup {
+            background-color: #FFFFFF;
+            border: 2px solid #E2E8F0;
+            border-radius: 1.5rem;
+            box-shadow: var(--shadow-md);
+            padding: 1.25rem;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .phone-header {
+            display: flex;
+            justify-content: center;
+            border-bottom: 2px solid #F3F4F6;
+            padding-bottom: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .phone-notch {
+            width: 90px;
+            height: 16px;
+            background-color: #E2E8F0;
+            border-radius: 8px;
+        }
+
+        .simulator-title {
+            text-align: center;
+            margin-bottom: 0.25rem;
+        }
+
+        .simulator-title h3 {
+            font-size: 1.15rem;
+            color: var(--manqa-orange);
+            font-weight: 700;
+        }
+
+        .simulator-title p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .input-group label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .input-field {
+            background-color: var(--gray-light);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 0.65rem 0.85rem;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.85rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-field:focus {
+            border-color: var(--manqa-orange);
+            background-color: white;
+        }
+
+        .btn-submit {
+            background-color: var(--manqa-orange);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            font-family: inherit;
+            box-shadow: 0 4px 10px rgba(244, 123, 32, 0.15);
+        }
+
+        .btn-submit:hover {
+            opacity: 0.95;
+        }
+
+        .examples-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .example-chip {
+            background-color: #FAF5EF;
+            border: 1px solid rgba(244, 123, 32, 0.15);
+            padding: 0.55rem 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+            font-style: normal;
+            font-weight: 500;
+        }
+
+        .example-chip:hover {
+            background-color: #FFF2E6;
+            border-color: var(--manqa-orange);
+            transform: translateX(2px);
+        }
+
+        /* Flujo del sistema vertical */
+        .flow-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+            padding: 0.25rem 0;
+        }
+
+        .flow-step-box {
+            display: flex;
+            gap: 0.85rem;
+            position: relative;
+        }
+
+        .flow-step-box:not(:last-child)::before {
+            content: '';
+            position: absolute;
+            top: 24px;
+            left: 12px;
+            width: 2px;
+            height: calc(100% - 16px);
+            background-color: var(--border-color);
+        }
+
+        .flow-step-num {
+            width: 26px;
+            height: 26px;
+            background-color: var(--manqa-blue);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            z-index: 2;
+            flex-shrink: 0;
+        }
+
+        .flow-step-box:nth-child(2) .flow-step-num { background-color: var(--manqa-green); }
+        .flow-step-box:nth-child(3) .flow-step-num { background-color: var(--manqa-orange); }
+        .flow-step-box:nth-child(4) .flow-step-num { background-color: var(--manqa-fuchsia); }
+        .flow-step-box:nth-child(5) .flow-step-num { background-color: var(--manqa-purple); }
+
+        .flow-step-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .flow-step-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .flow-step-desc {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .flow-step-muted {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* Historial de Mensajes */
+        .log-panel {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Animación */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="header-title">
+                <h1>Manq'a | <span>Wayna Hub</span></h1>
+                <p>Seguimiento de emprendedores por WhatsApp</p>
+            </div>
+            <div class="header-actions">
+                <form action="/manqa/demo/reset" method="POST" style="display: inline;" onsubmit="return confirm('¿Seguro que deseas reiniciar la simulación?');">
+                    <button type="submit" class="btn-reset">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        Limpiar demo
+                    </button>
+                </form>
+                <a href="/manqa/reporte.csv" class="btn-csv" id="btn-export-csv">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    Exportar reporte
+                </a>
+            </div>
+        </header>
+
+        <!-- 5 Resumen Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="label">Emprendedores acompañados</span>
+                <span class="val">{{ resumen.total_emprendedores }}</span>
+            </div>
+            <div class="stat-card">
+                <span class="label">Ventas registradas</span>
+                <span class="val">{{ resumen.ventas_registradas }}</span>
+            </div>
+            <div class="stat-card">
+                <span class="label">Necesidades de apoyo</span>
+                <span class="val">{{ resumen.refuerzos_detectados }}</span>
+            </div>
+            <div class="stat-card">
+                <span class="label">Asesorías solicitadas</span>
+                <span class="val">{{ resumen.asesorias_solicitadas }}</span>
+            </div>
+            <div class="stat-card">
+                <span class="label">Casos prioritarios</span>
+                <span class="val">{{ resumen.casos_prioritarios }}</span>
+            </div>
+        </div>
+
+        <!-- Bot Response Banner -->
+        {% if last_response %}
+            <div class="bot-response-bubble type-{{ last_type }}">
+                <div class="response-title">🤖 Respuesta del Bot (Tipo: {{ last_type }})</div>
+                <div class="response-body">{{ last_response }}</div>
+            </div>
+        {% elif reset == 'success' %}
+            <div class="bot-response-bubble type-reset">
+                <div class="response-title">🧹 Simulación Reiniciada</div>
+                <div class="response-body">Se han eliminado todos los datos de la base de datos de simulación correctamente.</div>
+            </div>
+        {% endif %}
+
+        <!-- Sección destacada: Casos que requieren seguimiento -->
+        <div class="followup-section">
+            <h3>⚠️ Casos que requieren seguimiento</h3>
+            <div class="followup-grid">
+                {% for caso in casos_seguimiento %}
+                    <div class="followup-card">
+                        <div class="followup-text">
+                            {{ caso.mensaje }}
+                        </div>
+                        <div class="followup-actions">
+                            {% if caso.accion == 'Completar perfil' %}
+                                <button class="btn-action-primary" onclick="alert('Contactando a {{ caso.telefono }} por WhatsApp para completar perfil...')">Contactar</button>
+                                <button class="btn-action-secondary" onclick="alert('Programando recordatorio para {{ caso.telefono }}...')">Recordatorio</button>
+                            {% elif caso.accion == 'Agendar asesoría' %}
+                                <button class="btn-action-primary" onclick="alert('Agendando asesoría comercial para el emprendedor...')">Agendar asesoría</button>
+                                <button class="btn-action-secondary" onclick="alert('Enviando propuesta de fecha...')">Enviar Propuesta</button>
+                            {% elif caso.accion == 'Revisar caso' %}
+                                <button class="btn-action-primary" onclick="alert('Revisando registros detallados de ventas...')">Revisar ventas</button>
+                                <button class="btn-action-secondary" onclick="alert('Agendando llamada de diagnóstico...')">Llamar</button>
+                            {% else %}
+                                <button class="btn-action-primary" onclick="alert('Enviando mensaje de cortesía...')">Enviar Saludo</button>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Workspace layout (Table + Sidebar) -->
+        <div class="workspace">
+            <!-- Left Panel: Monitoring Table -->
+            <div class="panel-box">
+                <div class="panel-box-header">
+                    <h2>Monitoreo de emprendedores</h2>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Teléfono</th>
+                                <th>Negocio</th>
+                                <th>Ventas</th>
+                                <th>Necesidad de apoyo</th>
+                                <th>Asesorías</th>
+                                <th>Última acción</th>
+                                <th>Prioridad</th>
+                                <th>Acción sugerida</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if emprendedores %}
+                                {% for emp in emprendedores %}
+                                    <tr>
+                                        <td style="font-weight: 700; color: var(--manqa-blue);">{{ emp.nombre }}</td>
+                                        <td style="color: var(--text-secondary);">{{ emp.telefono }}</td>
+                                        <td style="font-weight: 500;">{{ emp.negocio }}</td>
+                                        <td style="text-align: right; font-weight: 600;">{{ emp.ventas_total_fmt }}</td>
+                                        <td style="text-align: center; font-weight: 600; color: {{ 'var(--manqa-fuchsia)' if emp.refuerzos_count > 0 else 'inherit' }};">
+                                            {{ emp.refuerzos_count }}
+                                        </td>
+                                        <td style="text-align: center;">{{ emp.asesorias_count }}</td>
+                                        <td>
+                                            <span class="badge-last-action">
+                                                {{ emp.ultima_accion_fmt }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge-priority {{ emp.prioridad_class }}">
+                                                {{ emp.prioridad }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge-action-suggested {{ emp.accion_sugerida.lower().replace(' ', '-') }}">
+                                                {{ emp.accion_sugerida }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="9" style="text-align: center; color: var(--text-secondary); padding: 2rem;">
+                                        No hay emprendedores registrados en esta simulación. ¡Usa el simulador para ingresar un mensaje!
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Right Panel: Simulator & Flow -->
+            <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+                <!-- Phone Mockup Simulator -->
+                <div class="phone-mockup">
+                    <div class="phone-header">
+                        <div class="phone-notch"></div>
+                    </div>
+                    
+                    <div class="simulator-title">
+                        <h3>Simulador WhatsApp</h3>
+                        <p>Prueba mensajes de emprendedores</p>
+                    </div>
+
+                    <form action="/manqa/demo/mensaje" method="POST" class="simulator-form">
+                        <div class="input-group">
+                            <label for="telefono">Número de Teléfono</label>
+                            <input type="text" id="telefono" name="telefono" value="76543210" class="input-field" required>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="form-mensaje">Mensaje del Emprendedor</label>
+                            <input type="text" id="form-mensaje" name="mensaje" placeholder="Escribe un mensaje aquí..." class="input-field" required>
+                        </div>
+
+                        <button type="submit" class="btn-submit">Enviar mensaje</button>
+                    </form>
+
+                    <div style="margin-top: 0.25rem;">
+                        <span style="font-size: 0.75rem; color: var(--text-secondary); display: block; margin-bottom: 0.4rem; font-weight: 700; text-transform: uppercase;">Ejemplos rápidos:</span>
+                        <div class="examples-container">
+                            <button type="button" class="example-chip" onclick="usarEjemplo('Hola soy Ana y tengo una pasteleria')">
+                                📝 Hola soy Ana y tengo una pasteleria
+                            </button>
+                            <button type="button" class="example-chip" onclick="usarEjemplo('Vendi 2500 Bs este mes')">
+                                💰 Vendi 2500 Bs este mes
+                            </button>
+                            <button type="button" class="example-chip" onclick="usarEjemplo('Necesito apoyo en marketing')">
+                                🛠️ Necesito apoyo en marketing
+                            </button>
+                            <button type="button" class="example-chip" onclick="usarEjemplo('Quiero una asesoria')">
+                                📅 Quiero una asesoria
+                            </button>
+                            <button type="button" class="example-chip" onclick="usarEjemplo('hola que tal')">
+                                💬 hola que tal
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Flujo del sistema vertical -->
+                <div class="panel-box">
+                    <div class="panel-box-header">
+                        <h2>Flujo del sistema</h2>
+                    </div>
+                    <div class="flow-container">
+                        <div class="flow-step-box">
+                            <div class="flow-step-num">1</div>
+                            <div class="flow-step-content">
+                                <span class="flow-step-title">WhatsApp</span>
+                                <span class="flow-step-desc">Mensajes de emprendedores</span>
+                                <span class="flow-step-muted">El sistema clasifica automáticamente</span>
+                            </div>
+                        </div>
+                        <div class="flow-step-box">
+                            <div class="flow-step-num">2</div>
+                            <div class="flow-step-content">
+                                <span class="flow-step-title">Registro de datos</span>
+                                <span class="flow-step-desc">Ventas, apoyo, asesorías</span>
+                            </div>
+                        </div>
+                        <div class="flow-step-box">
+                            <div class="flow-step-num">3</div>
+                            <div class="flow-step-content">
+                                <span class="flow-step-title">Seguimiento</span>
+                                <span class="flow-step-desc">Monitoreo de casos</span>
+                            </div>
+                        </div>
+                        <div class="flow-step-box">
+                            <div class="flow-step-num">4</div>
+                            <div class="flow-step-content">
+                                <span class="flow-step-title">Asesoría</span>
+                                <span class="flow-step-desc">Acompañamiento técnico</span>
+                            </div>
+                        </div>
+                        <div class="flow-step-box">
+                            <div class="flow-step-num">5</div>
+                            <div class="flow-step-content">
+                                <span class="flow-step-title">Reporte</span>
+                                <span class="flow-step-desc">Exportación a CSV</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Historial de Mensajes Recientes -->
+        <div class="log-panel">
+            <div class="panel-box-header" style="margin-bottom: 1.25rem;">
+                <h2>Historial de mensajes recientes</h2>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Teléfono</th>
+                            <th>Mensaje</th>
+                            <th>Categoría</th>
+                            <th>Fecha y hora</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if mensajes %}
+                            {% for msg in mensajes %}
+                                <tr>
+                                    <td style="font-weight: 600;">{{ msg.telefono }}</td>
+                                    <td style="font-style: italic; color: var(--text-secondary);">"{{ msg.mensaje }}"</td>
+                                    <td>
+                                        {% if msg.tipo == 'venta' %}
+                                            <span class="badge-priority media" style="background-color: var(--success-bg); color: var(--success-text);">Venta</span>
+                                        {% elif msg.tipo == 'registro' %}
+                                            <span class="badge-priority normal" style="background-color: #E8DAEF; color: #8E44AD;">Registro</span>
+                                        {% elif msg.tipo == 'refuerzo' %}
+                                            <span class="badge-priority alta" style="background-color: #FADBD8; color: #C0392B;">Apoyo</span>
+                                        {% elif msg.tipo == 'asesoria' %}
+                                            <span class="badge-priority normal" style="background-color: #D6EAF8; color: #2E86C1;">Asesoría</span>
+                                        {% else %}
+                                            <span class="badge-priority" style="background-color: #E5E7EB; color: #7F8C8D;">General</span>
+                                        {% endif %}
+                                    </td>
+                                    <td style="color: var(--text-muted); font-size: 0.8rem;">{{ msg.creado_en }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="4" style="text-align: center; color: var(--text-secondary); padding: 1.5rem;">
+                                    No hay historial de mensajes aún.
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS Helper -->
+    <script>
+        function usarEjemplo(texto) {
+            const msgInput = document.getElementById('form-mensaje');
+            msgInput.value = texto;
+            msgInput.focus();
+        }
+    </script>
+</body>
+</html>
