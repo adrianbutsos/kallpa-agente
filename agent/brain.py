@@ -8,6 +8,7 @@ Soporta Function Calling para registrar costos, precios y generar análisis.
 
 import os
 import yaml
+import asyncio
 import logging
 from typing import Callable
 from google import genai
@@ -37,6 +38,33 @@ def obtener_cliente() -> genai.Client:
             )
         _cliente = genai.Client(api_key=api_key)
     return _cliente
+
+
+def _es_error_transitorio(e: Exception) -> bool:
+    """Detecta errores temporales de Gemini que conviene reintentar (sobrecarga)."""
+    msg = str(e).lower()
+    return any(s in msg for s in ("503", "unavailable", "overloaded", "high demand"))
+
+
+async def _generar_con_reintentos(gemini, contents, config, intentos: int = 3):
+    """Llama a Gemini reintentando si el modelo está temporalmente sobrecargado (503)."""
+    ultimo_error = None
+    for i in range(intentos):
+        try:
+            return await gemini.aio.models.generate_content(
+                model=MODELO, contents=contents, config=config
+            )
+        except Exception as e:
+            if _es_error_transitorio(e) and i < intentos - 1:
+                espera = 2 ** i  # 1s, 2s, 4s...
+                logger.warning(
+                    f"Gemini sobrecargado (intento {i+1}/{intentos}), reintentando en {espera}s..."
+                )
+                ultimo_error = e
+                await asyncio.sleep(espera)
+                continue
+            raise
+    raise ultimo_error
 
 
 def cargar_config_prompts() -> dict:
@@ -159,11 +187,7 @@ async def generar_respuesta(
 
         for iteracion in range(max_iteraciones):
             logger.info(f"Iteración {iteracion + 1} — llamando a Gemini...")
-            response = await gemini.aio.models.generate_content(
-                model=MODELO,
-                contents=contents,
-                config=config_gen
-            )
+            response = await _generar_con_reintentos(gemini, contents, config_gen)
 
             logger.info(f"Respuesta recibida — finish_reason: {response.candidates[0].finish_reason}")
 
