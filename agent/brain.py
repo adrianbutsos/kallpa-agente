@@ -18,8 +18,8 @@ from dotenv import load_dotenv
 load_dotenv()
 logger = logging.getLogger("kallpa")
 
-# gemini-2.5-flash con cuenta paga — API estable
-MODELO = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+# gemini-2.5-flash-lite — liviano, rápido y menos propenso a saturarse (503)
+MODELO = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite")
 
 # Cliente Gemini — se crea de forma "lazy" (solo cuando se necesita).
 # Así, si falta GEMINI_API_KEY, NO se cae todo el servidor al arrancar:
